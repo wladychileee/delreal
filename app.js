@@ -1,6 +1,9 @@
 let equiposData = [];
 let filteredData = [];
 let currentTipo = '';
+let currentTipoNormalizado = '';
+let datosCargados = false;
+let busquedaRealizada = false;
 
 // Cargar datos del JSON
 async function cargarDatos() {
@@ -22,7 +25,8 @@ async function cargarDatos() {
 function inicializarApp() {
     poblarFiltros();
     mostrarTipos();
-    mostrarEquipos();
+    // No mostrar equipos hasta que se presione buscar
+    mostrarMensajeInicial();
     actualizarEstadisticas();
     configurarEventListeners();
 }
@@ -43,10 +47,12 @@ function poblarFiltros() {
         const bNum = parseInt(b) || 0;
         return bNum - aNum;
     });
+    const patentes = [...new Set(equiposData.map(e => e.Patente).filter(p => p))].sort();
 
     const tipoFilter = document.getElementById('tipoFilter');
     const marcaFilter = document.getElementById('marcaFilter');
     const anioFilter = document.getElementById('anioFilter');
+    const patenteFilter = document.getElementById('patenteFilter');
 
     tipos.forEach(tipo => {
         const option = document.createElement('option');
@@ -68,6 +74,18 @@ function poblarFiltros() {
         option.textContent = anio;
         anioFilter.appendChild(option);
     });
+
+    patentes.forEach(patente => {
+        const option = document.createElement('option');
+        option.value = patente;
+        option.textContent = patente;
+        patenteFilter.appendChild(option);
+    });
+}
+
+// Función para normalizar texto (eliminar acentos)
+function normalizarTexto(texto) {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 // Mostrar lista de tipos en el sidebar
@@ -78,26 +96,29 @@ function mostrarTipos() {
     const tipos = {};
     equiposData.forEach(equipo => {
         const tipo = equipo.Tipo || 'Sin clasificar';
-        if (!tipos[tipo]) {
-            tipos[tipo] = 0;
+        // Normalizar para agrupar ignorando acentos
+        const tipoNormalizado = normalizarTexto(tipo);
+        if (!tipos[tipoNormalizado]) {
+            tipos[tipoNormalizado] = { nombre: tipo, count: 0 };
         }
-        tipos[tipo]++;
+        tipos[tipoNormalizado].count++;
     });
 
-    Object.keys(tipos).sort().forEach(tipo => {
+    Object.keys(tipos).sort().forEach(tipoNormalizado => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span>${tipo}</span>
-            <span class="tipo-count">${tipos[tipo]}</span>
+            <span>${tipos[tipoNormalizado].nombre}</span>
+            <span class="tipo-count">${tipos[tipoNormalizado].count}</span>
         `;
-        li.addEventListener('click', () => filtrarPorTipo(tipo, li));
+        li.addEventListener('click', () => filtrarPorTipo(tipos[tipoNormalizado].nombre, li, tipoNormalizado));
         tipoList.appendChild(li);
     });
 }
 
 // Filtrar por tipo
-function filtrarPorTipo(tipo, element) {
+function filtrarPorTipo(tipo, element, tipoNormalizado) {
     currentTipo = tipo;
+    currentTipoNormalizado = tipoNormalizado || normalizarTexto(tipo);
     
     // Actualizar clase activa
     document.querySelectorAll('.tipo-list li').forEach(li => li.classList.remove('active'));
@@ -105,15 +126,21 @@ function filtrarPorTipo(tipo, element) {
         element.classList.add('active');
     }
 
+    busquedaRealizada = true;
     aplicarFiltros();
 }
 
 // Aplicar todos los filtros
 function aplicarFiltros() {
+    if (!busquedaRealizada) {
+        return; // No mostrar resultados hasta que se presione buscar
+    }
+
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const tipoFilter = document.getElementById('tipoFilter').value;
     const marcaFilter = document.getElementById('marcaFilter').value;
     const anioFilter = document.getElementById('anioFilter').value;
+    const patenteFilter = document.getElementById('patenteFilter').value;
 
     filteredData = equiposData.filter(equipo => {
         const tipo = equipo.Tipo || '';
@@ -123,10 +150,10 @@ function aplicarFiltros() {
 
         // Filtro de búsqueda
         const matchSearch = !searchTerm || 
-            tipo.toLowerCase().includes(searchTerm) ||
-            marcaModelo.toLowerCase().includes(searchTerm) ||
-            anio.toString().toLowerCase().includes(searchTerm) ||
-            patente.toLowerCase().includes(searchTerm);
+            normalizarTexto(tipo).includes(normalizarTexto(searchTerm)) ||
+            normalizarTexto(marcaModelo).includes(normalizarTexto(searchTerm)) ||
+            normalizarTexto(anio.toString()).includes(normalizarTexto(searchTerm)) ||
+            normalizarTexto(patente).includes(normalizarTexto(searchTerm));
 
         // Filtro de tipo
         const matchTipo = !tipoFilter || tipo === tipoFilter;
@@ -141,20 +168,40 @@ function aplicarFiltros() {
         // Filtro de año
         const matchAnio = !anioFilter || anio === anioFilter;
 
-        // Filtro de tipo seleccionado en sidebar
-        const matchCurrentTipo = !currentTipo || tipo === currentTipo;
+        // Filtro de patente
+        const matchPatente = !patenteFilter || patente === patenteFilter;
 
-        return matchSearch && matchTipo && matchMarca && matchAnio && matchCurrentTipo;
+        // Filtro de tipo seleccionado en sidebar (ignorando acentos)
+        const matchCurrentTipo = !currentTipo || normalizarTexto(tipo) === currentTipoNormalizado;
+
+        return matchSearch && matchTipo && matchMarca && matchAnio && matchPatente && matchCurrentTipo;
     });
 
     mostrarEquipos();
     actualizarEstadisticas();
 }
 
+// Mostrar mensaje inicial
+function mostrarMensajeInicial() {
+    const grid = document.getElementById('equiposGrid');
+    grid.innerHTML = `
+        <div class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <div class="no-results-text">Presiona el botón de búsqueda para ver los equipos</div>
+            <div>Puedes usar el buscador de texto o los filtros desplegables</div>
+        </div>
+    `;
+}
+
 // Mostrar equipos en el grid
 function mostrarEquipos() {
     const grid = document.getElementById('equiposGrid');
     grid.innerHTML = '';
+
+    if (!busquedaRealizada) {
+        mostrarMensajeInicial();
+        return;
+    }
 
     if (filteredData.length === 0) {
         grid.innerHTML = `
@@ -306,7 +353,7 @@ function actualizarEstadisticas() {
     const tipos = new Set(equiposData.map(e => e.Tipo).filter(t => t));
     document.getElementById('tiposCount').textContent = tipos.size;
     
-    document.getElementById('filteredCount').textContent = filteredData.length;
+    document.getElementById('filteredCount').textContent = busquedaRealizada ? filteredData.length : 0;
 }
 
 // Configurar event listeners
@@ -315,13 +362,25 @@ function configurarEventListeners() {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     
-    searchInput.addEventListener('input', aplicarFiltros);
-    searchBtn.addEventListener('click', aplicarFiltros);
+    // Solo aplicar filtros cuando se presiona el botón de búsqueda
+    searchBtn.addEventListener('click', () => {
+        busquedaRealizada = true;
+        aplicarFiltros();
+    });
     
-    // Filtros
-    document.getElementById('tipoFilter').addEventListener('change', aplicarFiltros);
-    document.getElementById('marcaFilter').addEventListener('change', aplicarFiltros);
-    document.getElementById('anioFilter').addEventListener('change', aplicarFiltros);
+    // Permitir búsqueda con Enter
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            busquedaRealizada = true;
+            aplicarFiltros();
+        }
+    });
+    
+    // Filtros - solo aplicar cuando se presiona el botón de buscar filtros
+    document.getElementById('filterSearchBtn').addEventListener('click', () => {
+        busquedaRealizada = true;
+        aplicarFiltros();
+    });
     
     // Limpiar filtros
     document.getElementById('clearFilters').addEventListener('click', () => {
@@ -329,9 +388,13 @@ function configurarEventListeners() {
         document.getElementById('tipoFilter').value = '';
         document.getElementById('marcaFilter').value = '';
         document.getElementById('anioFilter').value = '';
+        document.getElementById('patenteFilter').value = '';
         currentTipo = '';
+        currentTipoNormalizado = '';
+        busquedaRealizada = false;
         document.querySelectorAll('.tipo-list li').forEach(li => li.classList.remove('active'));
-        aplicarFiltros();
+        mostrarMensajeInicial();
+        actualizarEstadisticas();
     });
     
     // Modal
