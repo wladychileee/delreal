@@ -461,27 +461,191 @@ body {
 }
 
 @media (max-width: 768px) {
-    .content {
-        grid-template-columns: 1fr;
+    .container {
+        padding: 10px;
     }
     
-    .sidebar {
-        position: static;
+    .header {
+        padding: 20px 15px;
+        margin-bottom: 15px;
     }
     
     .header h1 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
     }
     
-    .equipos-grid {
-        grid-template-columns: 1fr;
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .search-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .search-bar {
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+    
+    .search-input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .search-btn {
+        width: 100%;
+        padding: 12px;
     }
     
     .filters {
         flex-direction: column;
+        gap: 10px;
     }
     
     .filter-select {
         width: 100%;
+        padding: 12px;
+    }
+    
+    .filter-search-btn {
+        width: 100%;
+    }
+    
+    .clear-btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    .stats-section {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        padding: 15px 10px;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .sidebar {
+        position: static;
+        padding: 15px;
+    }
+    
+    .sidebar h3 {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    
+    .tipo-list li {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+    
+    .equipos-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .equipo-card {
+        padding: 15px;
+    }
+    
+    .equipo-tipo {
+        font-size: 0.75rem;
+        margin-bottom: 6px;
+    }
+    
+    .equipo-marca {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+    
+    .equipo-modelo {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+    }
+    
+    .equipo-info {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .equipo-precio {
+        font-size: 1rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        margin-bottom: 20px;
+    }
+    
+    .modal-titulo {
+        font-size: 1.4rem;
+    }
+    
+    .modal-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .modal-field {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .tipo-list li {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .equipo-card {
+        padding: 12px;
+    }
+    
+    .modal-titulo {
+        font-size: 1.2rem;
     }
 }
