@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flota de Vehículos y Maquinarias</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚛 Flota de Vehículos y Maquinarias</h1>
+            <p class="subtitle">Arriendo y Venta de Equipos Profesionales</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar por tipo, marca, modelo, año o patente..." class="search-input">
+                <button id="searchBtn" class="search-btn">🔍</button>
+            </div>
+            <div class="filters">
+                <select id="tipoFilter" class="filter-select">
+                    <option value="">Todos los Tipos</option>
+                </select>
+                <select id="marcaFilter" class="filter-select">
+                    <option value="">Todas las Marcas</option>
+                </select>
+                <select id="anioFilter" class="filter-select">
+                    <option value="">Todos los Años</option>
+                </select>
+                <button id="clearFilters" class="clear-btn">Limpiar Filtros</button>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <span class="stat-number" id="totalEquipos">0</span>
+                <span class="stat-label">Total Equipos</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="tiposCount">0</span>
+                <span class="stat-label">Tipos de Equipos</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="filteredCount">0</span>
+                <span class="stat-label">Filtrados</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <aside class="sidebar">
+                <h3>Tipos de Equipos</h3>
+                <ul id="tipoList" class="tipo-list"></ul>
+            </aside>
+
+            <main class="main-content">
+                <div id="equiposGrid" class="equipos-grid"></div>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
