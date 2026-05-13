@@ -96,23 +96,44 @@ function mostrarTipos() {
     const tipos = {};
     equiposData.forEach(equipo => {
         const tipo = equipo.Tipo || 'Sin clasificar';
-        // Normalizar para agrupar ignorando acentos
-        const tipoNormalizado = normalizarTexto(tipo);
+        // Normalizar para agrupar ignorando acentos y espacios extra
+        const tipoNormalizado = normalizarTexto(tipo.trim());
         if (!tipos[tipoNormalizado]) {
-            tipos[tipoNormalizado] = { nombre: tipo, count: 0 };
+            tipos[tipoNormalizado] = { nombre: tipo.trim(), count: 0, nombres: new Set() };
         }
         tipos[tipoNormalizado].count++;
+        tipos[tipoNormalizado].nombres.add(tipo.trim());
     });
 
-    Object.keys(tipos).sort().forEach(tipoNormalizado => {
+    // Ordenar por cantidad descendente
+    const tiposOrdenados = Object.keys(tipos).sort((a, b) => tipos[b].count - tipos[a].count);
+
+    tiposOrdenados.forEach(tipoNormalizado => {
         const li = document.createElement('li');
+        // Usar el nombre más común para este grupo
+        const nombreMasComun = obtenerNombreMasComun(tipos[tipoNormalizado].nombres);
         li.innerHTML = `
-            <span>${tipos[tipoNormalizado].nombre}</span>
+            <span>${nombreMasComun}</span>
             <span class="tipo-count">${tipos[tipoNormalizado].count}</span>
         `;
-        li.addEventListener('click', () => filtrarPorTipo(tipos[tipoNormalizado].nombre, li, tipoNormalizado));
+        li.addEventListener('click', () => filtrarPorTipo(nombreMasComun, li, tipoNormalizado));
         tipoList.appendChild(li);
     });
+}
+
+// Obtener el nombre más común de un set de nombres
+function obtenerNombreMasComun(nombres) {
+    const nombreArray = Array.from(nombres);
+    if (nombreArray.length === 1) return nombreArray[0];
+    
+    // Contar frecuencia de cada nombre
+    const frecuencias = {};
+    nombreArray.forEach(nombre => {
+        frecuencias[nombre] = (frecuencias[nombre] || 0) + 1;
+    });
+    
+    // Retornar el nombre más frecuente
+    return Object.keys(frecuencias).reduce((a, b) => frecuencias[a] > frecuencias[b] ? a : b);
 }
 
 // Filtrar por tipo
